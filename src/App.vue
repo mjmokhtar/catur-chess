@@ -236,11 +236,12 @@ function handleResign() {
 
 /* ── Piece ── */
 .piece {
-  font-size: clamp(1.6rem, 5vw, 2.6rem);
-  line-height: 1;
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
   user-select: none;
   pointer-events: none;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+  filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.35));
 }
 
 /* ── Koordinat ── */

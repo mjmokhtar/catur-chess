@@ -14,7 +14,13 @@
         ]"
         @click="$emit('square-click', square.id)"
       >
-        <span v-if="square.piece" class="piece">{{ pieceUnicode(square.piece) }}</span>
+        <img
+          v-if="square.piece"
+          class="piece"
+          :src="pieceImage(square.piece)"
+          :alt="square.piece.type"
+          draggable="false"
+        />
         <span v-if="legalMoves.includes(square.id) && !square.piece" class="dot" />
         <span class="coord-file" v-if="square.rank === 1">{{ square.file }}</span>
         <span class="coord-rank" v-if="square.file === 'a'">{{ square.rank }}</span>
@@ -37,9 +43,10 @@ const props = defineProps({
 })
 defineEmits(['square-click'])
 
-const UNICODE = {
-  wk: '♔', wq: '♕', wr: '♖', wb: '♗', wn: '♘', wp: '♙',
-  bk: '♚', bq: '♛', br: '♜', bb: '♝', bn: '♞', bp: '♟',
+function pieceImage(piece) {
+  const colorPrefix = piece.color === 'w' ? 'w' : 'b'
+  const typeMap = { k: 'K', q: 'Q', r: 'R', b: 'B', n: 'N', p: 'P' }
+  return `/pieces/${colorPrefix}${typeMap[piece.type]}.svg`
 }
 
 function pieceUnicode(piece) {
