@@ -23,6 +23,12 @@
     <!-- Game -->
     <template v-else>
 
+      <GameClock
+        :player-time="playerTime"
+        :bot-time="botTime"
+        :format-time="formatTime"
+      />
+
       <GameStatus
         :status="status"
         :turn="turn"
@@ -67,7 +73,6 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
 import ChessBoard from './components/ChessBoard.vue'
 import GameStatus from './components/GameStatus.vue'
 import DifficultySelector from './components/DifficultySelector.vue'
@@ -76,6 +81,9 @@ import { useStockfish } from './composables/useStockfish.js'
 import MoveHistory from './components/MoveHistory.vue'
 import PromotionDialog from './components/PromotionDialog.vue'
 import { useSound } from './composables/useSound.js'
+import { ref, computed, onMounted, watch } from 'vue'
+import GameClock from './components/GameClock.vue'
+import { useGameClock } from './composables/useGameClock.js'
 
 const skillLevel = ref(10)
 const isBotThinking = ref(false)
@@ -112,6 +120,24 @@ function playSoundForLastMove() {
   }
 }
 
+const {
+  whiteTime, blackTime,
+  start: startClock, stopAll: stopClock, reset: resetClock, formatTime
+} = useGameClock()
+
+const playerTime = computed(() => playerColor.value === 'w' ? whiteTime.value : blackTime.value)
+const botTime = computed(() => playerColor.value === 'w' ? blackTime.value : whiteTime.value)
+
+watch(turn, (newTurn) => {
+  if (gameStarted.value && !isGameOver.value) {
+    startClock(newTurn)
+  }
+})
+
+watch(isGameOver, (over) => {
+  if (over) stopClock()
+})
+
 async function triggerBotMoveIfNeeded() {
   if (isGameOver.value) return
   if (turn.value !== botColor.value) return
@@ -145,14 +171,16 @@ async function onPromotionChoose(pieceType) {
 
 function startGame() {
   resetGame(chosenColor.value)
+  resetClock()
   gameStarted.value = true
-  // Jika pemain pilih hitam, bot (putih) jalan duluan
+  startClock('w') // giliran selalu mulai dari putih
   triggerBotMoveIfNeeded()
 }
 
 function backToColorSelect() {
   gameStarted.value = false
   isBotThinking.value = false
+  stopClock()
 }
 
 function handleResign() {
